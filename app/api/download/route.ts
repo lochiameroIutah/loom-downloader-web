@@ -15,37 +15,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid Loom URL' }, { status: 400 })
     }
 
-    // Fetch video info and download URL from Loom API
-    const [transcodeResponse, videoInfoResponse] = await Promise.all([
-      axios.post(`https://www.loom.com/api/campaigns/sessions/${videoId}/transcoded-url`),
-      axios.get(`https://www.loom.com/api/campaigns/sessions/${videoId}`)
-    ])
+    console.log(`Processing video ID: ${videoId}`)
 
-    if (!transcodeResponse.data.url) {
-      return NextResponse.json({ error: 'Could not get download URL' }, { status: 404 })
+    try {
+      // Fetch download URL first (most important)
+      const transcodeResponse = await axios.post(
+        `https://www.loom.com/api/campaigns/sessions/${videoId}/transcoded-url`,
+        {},
+        {
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; LoomDownloader/1.0)',
+            'Accept': 'application/json'
+          }
+        }
+      )
+
+      if (!transcodeResponse.data?.url) {
+        return NextResponse.json({ error: 'Could not get download URL from Loom' }, { status: 404 })
+      }
+
+      // Try to get video title, but don't fail if this doesn't work
+      let videoTitle = 'Loom Video'
+      try {
+        const videoInfoResponse = await axios.get(
+          `https://www.loom.com/api/campaigns/sessions/${videoId}`,
+          {
+            timeout: 5000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; LoomDownloader/1.0)',
+              'Accept': 'application/json'
+            }
+          }
+        )
+        videoTitle = videoInfoResponse.data?.name || 'Loom Video'
+      } catch (titleError) {
+        console.log('Could not fetch video title, using default')
+      }
+
+      // Clean title for filename
+      const cleanTitle = videoTitle
+        .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim()
+        .substring(0, 100) // Limit length
+      
+      const filename = cleanTitle ? `${cleanTitle}.mp4` : `${videoId}.mp4`
+
+      return NextResponse.json({ 
+        downloadUrl: transcodeResponse.data.url,
+        videoId,
+        filename,
+        title: videoTitle
+      })
+
+    } catch (apiError) {
+      console.error('Loom API error:', apiError)
+      return NextResponse.json({ 
+        error: `Loom API error: ${apiError.message || 'Unknown error'}` 
+      }, { status: 502 })
     }
 
-    // Get video title and clean it for filename
-    const videoTitle = videoInfoResponse.data?.name || 'Loom Video'
-    const cleanTitle = videoTitle
-      .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-      .trim()
-      .substring(0, 100) // Limit length
-    
-    const filename = cleanTitle ? `${cleanTitle}.mp4` : `${videoId}.mp4`
-
-    return NextResponse.json({ 
-      downloadUrl: transcodeResponse.data.url,
-      videoId,
-      filename,
-      title: videoTitle
-    })
-
   } catch (error) {
-    console.error('Download API error:', error)
+    console.error('General API error:', error)
     return NextResponse.json({ 
-      error: 'Failed to process download request' 
+      error: `Server error: ${error.message || 'Unknown error'}` 
     }, { status: 500 })
   }
 }
