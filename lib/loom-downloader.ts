@@ -1,6 +1,7 @@
 export interface DownloadResult {
   filename: string
   videoId: string
+  title?: string
 }
 
 export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
@@ -37,13 +38,14 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
         if (navigator.canShare && navigator.canShare({ files: [videoFile] })) {
           // Share the actual video file
           await navigator.share({
-            title: 'Loom Video Downloaded',
-            text: `Downloaded: ${data.filename}`,
+            title: data.title || 'Loom Video',
+            text: `Downloaded: ${data.title || data.filename}`,
             files: [videoFile]
           })
           return {
             filename: data.filename,
             videoId: data.videoId,
+            title: data.title
           }
         }
       } catch (shareError) {
@@ -64,6 +66,7 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
     return {
       filename: data.filename,
       videoId: data.videoId,
+      title: data.title
     }
   } catch (error) {
     if (error instanceof Error) {

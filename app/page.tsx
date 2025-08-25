@@ -41,9 +41,9 @@ export default function Home() {
       const result = await downloadLoomVideo(url)
       
       if (isMobile) {
-        setMessage(`Video ready to share: ${result.filename}`)
+        setMessage(`Video ready to share: ${result.title || result.filename}`)
       } else {
-        setMessage(`Video downloaded successfully as ${result.filename}`)
+        setMessage(`Video downloaded successfully: ${result.title || result.filename}`)
       }
       setMessageType('success')
     } catch (error) {
