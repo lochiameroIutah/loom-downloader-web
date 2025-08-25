@@ -113,7 +113,7 @@ export default function Home() {
         </div>
 
         {/* Info Section */}
-        <div className="mt-8 bg-white/50 backdrop-blur rounded-2xl border border-white/20 p-6">
+        <div className="mt-8 bg-white bg-opacity-80 rounded-2xl border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-800 mb-4">How it works:</h3>
           <ol className="space-y-2 text-gray-600">
             <li className="flex items-start gap-3">

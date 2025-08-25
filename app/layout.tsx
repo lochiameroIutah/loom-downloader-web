@@ -34,7 +34,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Loom Downloader" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <body className="min-h-screen bg-gray-50">
         {children}
         <script
           dangerouslySetInnerHTML={{
