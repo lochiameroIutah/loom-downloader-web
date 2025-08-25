@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Video, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Download, Video, CheckCircle, AlertCircle, Loader2, Clipboard, X } from 'lucide-react'
 import { downloadLoomVideo } from '../lib/loom-downloader'
 
 export default function Home() {
@@ -41,6 +41,22 @@ export default function Home() {
     }
   }
 
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      setUrl(text)
+      setMessage('')
+    } catch (error) {
+      setMessage('Failed to paste from clipboard')
+      setMessageType('error')
+    }
+  }
+
+  const handleClear = () => {
+    setUrl('')
+    setMessage('')
+  }
+
   const MessageIcon = messageType === 'success' ? CheckCircle : 
                      messageType === 'error' ? AlertCircle : Video
 
@@ -69,15 +85,40 @@ export default function Home() {
               <label htmlFor="url" className="block text-sm font-semibold text-gray-700 mb-2 md:mb-3">
                 Loom Video URL
               </label>
-              <input
-                type="url"
-                id="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://www.loom.com/share/your-video-id"
-                className="w-full px-3 py-3 md:px-4 md:py-4 border border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-loom-purple focus:border-transparent transition-all duration-200 text-base md:text-lg"
-                disabled={isDownloading}
-              />
+              <div className="relative">
+                <input
+                  type="url"
+                  id="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://www.loom.com/share/your-video-id"
+                  className="w-full px-3 py-3 md:px-4 md:py-4 pr-16 border border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-loom-purple focus:border-transparent transition-all duration-200 text-base md:text-lg"
+                  disabled={isDownloading}
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  {url.trim() ? (
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      disabled={isDownloading}
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 disabled:opacity-50"
+                      title="Clear"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handlePaste}
+                      disabled={isDownloading}
+                      className="p-2 text-gray-400 hover:text-loom-purple transition-colors duration-200 disabled:opacity-50"
+                      title="Paste"
+                    >
+                      <Clipboard className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <button
