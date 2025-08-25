@@ -9,69 +9,35 @@ export default function Home() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info')
-  const [debugLogs, setDebugLogs] = useState<string[]>([])
-  const [showDebug, setShowDebug] = useState(false)
-
-  const addDebugLog = (log: string) => {
-    const timestamp = new Date().toLocaleTimeString()
-    setDebugLogs(prev => [...prev, `[${timestamp}] ${log}`])
-  }
-
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Clear previous debug logs
-    setDebugLogs([])
-    addDebugLog('Starting download process')
     
     if (!url.trim()) {
       setMessage('Please enter a Loom URL')
       setMessageType('error')
-      addDebugLog('ERROR: Empty URL')
       return
     }
 
     if (!url.includes('loom.com/share/')) {
       setMessage('Please enter a valid Loom URL (must contain loom.com/share/)')
       setMessageType('error')
-      addDebugLog('ERROR: Invalid URL format')
       return
     }
 
     setIsDownloading(true)
     setMessage('Preparing download...')
     setMessageType('info')
-    addDebugLog('URL validation passed')
 
     try {
-      // Check if mobile for different messaging
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      addDebugLog(`Device type: ${isMobile ? 'Mobile' : 'Desktop'}`)
-      
-      if (isMobile) {
-        setMessage('Downloading video file...')
-        setMessageType('info')
-        addDebugLog('Setting mobile download message')
-      }
-      
-      addDebugLog('Calling downloadLoomVideo function')
-      const result = await downloadLoomVideo(url, addDebugLog)
-      addDebugLog(`Download completed: ${result.filename}`)
-      
-      if (isMobile) {
-        setMessage(`Video ready to share: ${result.title || result.filename}`)
-      } else {
-        setMessage(`Video downloaded successfully: ${result.title || result.filename}`)
-      }
+      const result = await downloadLoomVideo(url)
+      setMessage(`Video downloaded successfully: ${result.title || result.filename}`)
       setMessageType('success')
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to download video'
       setMessage(errorMsg)
       setMessageType('error')
-      addDebugLog(`ERROR: ${errorMsg}`)
     } finally {
       setIsDownloading(false)
-      addDebugLog('Download process finished')
     }
   }
 
@@ -122,14 +88,12 @@ export default function Home() {
               {isDownloading ? (
                 <>
                   <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
-                  <span className="hidden sm:inline">Downloading...</span>
-                  <span className="sm:hidden">Loading...</span>
+                  Downloading...
                 </>
               ) : (
                 <>
                   <Download className="h-5 w-5 md:h-6 md:w-6" />
-                  <span className="hidden sm:inline">Download Video</span>
-                  <span className="sm:hidden">Download</span>
+                  Download Video
                 </>
               )}
             </button>
@@ -167,24 +131,6 @@ export default function Home() {
           </ol>
         </div>
 
-        {/* Debug Panel */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowDebug(!showDebug)}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-          </button>
-          
-          {showDebug && debugLogs.length > 0 && (
-            <div className="mt-4 bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-60 overflow-y-auto">
-              <div className="text-gray-300 mb-2">Debug Logs:</div>
-              {debugLogs.map((log, index) => (
-                <div key={index} className="mb-1">{log}</div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Footer */}
         <div className="text-center mt-8 text-gray-500">
