@@ -45,28 +45,28 @@ export default function Home() {
                      messageType === 'error' ? AlertCircle : Video
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
+    <main className="min-h-screen flex items-center justify-center p-4 md:p-8">
+      <div className="max-w-2xl w-full px-4 md:px-0">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-3 bg-loom-purple rounded-2xl shadow-lg">
-              <Video className="h-8 w-8 text-white" />
+        <div className="text-center mb-8 md:mb-12">
+          <div className="inline-flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="p-2 md:p-3 bg-loom-purple rounded-xl md:rounded-2xl shadow-lg">
+              <Video className="h-6 w-6 md:h-8 md:w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-loom-purple to-loom-light bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-loom-purple to-loom-light bg-clip-text text-transparent">
               Loom Downloader
             </h1>
           </div>
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <p className="text-base md:text-lg text-gray-600 leading-relaxed px-2 md:px-0">
             Download your Loom videos quickly and easily. Simply paste your Loom share link below.
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-          <form onSubmit={handleDownload} className="space-y-6">
+        <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-4 md:p-8">
+          <form onSubmit={handleDownload} className="space-y-4 md:space-y-6">
             <div>
-              <label htmlFor="url" className="block text-sm font-semibold text-gray-700 mb-3">
+              <label htmlFor="url" className="block text-sm font-semibold text-gray-700 mb-2 md:mb-3">
                 Loom Video URL
               </label>
               <input
@@ -75,7 +75,7 @@ export default function Home() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.loom.com/share/your-video-id"
-                className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-loom-purple focus:border-transparent transition-all duration-200 text-lg"
+                className="w-full px-3 py-3 md:px-4 md:py-4 border border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-loom-purple focus:border-transparent transition-all duration-200 text-base md:text-lg"
                 disabled={isDownloading}
               />
             </div>
@@ -83,17 +83,19 @@ export default function Home() {
             <button
               type="submit"
               disabled={isDownloading || !url.trim()}
-              className="w-full bg-gradient-to-r from-loom-purple to-loom-light text-white py-4 px-6 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-3"
+              className="w-full bg-gradient-to-r from-loom-purple to-loom-light text-white py-3 px-4 md:py-4 md:px-6 rounded-lg md:rounded-xl font-semibold text-base md:text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 md:gap-3"
             >
               {isDownloading ? (
                 <>
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  Downloading...
+                  <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin" />
+                  <span className="hidden sm:inline">Downloading...</span>
+                  <span className="sm:hidden">Loading...</span>
                 </>
               ) : (
                 <>
-                  <Download className="h-6 w-6" />
-                  Download Video
+                  <Download className="h-5 w-5 md:h-6 md:w-6" />
+                  <span className="hidden sm:inline">Download Video</span>
+                  <span className="sm:hidden">Download</span>
                 </>
               )}
             </button>
