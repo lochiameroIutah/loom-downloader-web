@@ -30,8 +30,21 @@ export default function Home() {
     setMessageType('info')
 
     try {
+      // Check if mobile for different messaging
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      
+      if (isMobile) {
+        setMessage('Downloading video file...')
+        setMessageType('info')
+      }
+      
       const result = await downloadLoomVideo(url)
-      setMessage(`Video downloaded successfully as ${result.filename}`)
+      
+      if (isMobile) {
+        setMessage(`Video ready to share: ${result.filename}`)
+      } else {
+        setMessage(`Video downloaded successfully as ${result.filename}`)
+      }
       setMessageType('success')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to download video')

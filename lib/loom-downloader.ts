@@ -24,17 +24,34 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
     // Check if we're on mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     
-    if (isMobile) {
-      // On mobile, open the download URL in a new tab
-      // This allows the user to use their browser's download functionality
-      window.open(data.downloadUrl, '_blank')
-      return {
-        filename: data.filename,
-        videoId: data.videoId,
+    if (isMobile && navigator.share) {
+      try {
+        // Download the video file as blob
+        const videoResponse = await fetch(data.downloadUrl)
+        const videoBlob = await videoResponse.blob()
+        
+        // Create a file from the blob
+        const videoFile = new File([videoBlob], data.filename, { type: 'video/mp4' })
+        
+        // Check if sharing files is supported
+        if (navigator.canShare && navigator.canShare({ files: [videoFile] })) {
+          // Share the actual video file
+          await navigator.share({
+            title: 'Loom Video Downloaded',
+            text: `Downloaded: ${data.filename}`,
+            files: [videoFile]
+          })
+          return {
+            filename: data.filename,
+            videoId: data.videoId,
+          }
+        }
+      } catch (shareError) {
+        console.log('Share with file failed, falling back to direct download')
       }
     }
     
-    // Desktop: direct download
+    // Desktop or fallback: direct download
     const link = document.createElement('a')
     link.href = data.downloadUrl
     link.download = data.filename
