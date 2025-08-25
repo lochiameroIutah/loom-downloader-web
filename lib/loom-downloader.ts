@@ -24,25 +24,17 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
     // Check if we're on mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     
-    if (isMobile && navigator.share) {
-      // Use native share menu on mobile
-      try {
-        await navigator.share({
-          title: 'Download Loom Video',
-          text: `Download: ${data.filename}`,
-          url: data.downloadUrl
-        })
-        return {
-          filename: data.filename,
-          videoId: data.videoId,
-        }
-      } catch (shareError) {
-        // Fall back to direct download if share is cancelled
-        console.log('Share cancelled, falling back to download')
+    if (isMobile) {
+      // On mobile, open the download URL in a new tab
+      // This allows the user to use their browser's download functionality
+      window.open(data.downloadUrl, '_blank')
+      return {
+        filename: data.filename,
+        videoId: data.videoId,
       }
     }
     
-    // Desktop or fallback: direct download
+    // Desktop: direct download
     const link = document.createElement('a')
     link.href = data.downloadUrl
     link.download = data.filename
