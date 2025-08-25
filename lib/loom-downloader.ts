@@ -4,9 +4,11 @@ export interface DownloadResult {
   title?: string
 }
 
-export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
+export async function downloadLoomVideo(url: string, debugLog?: (msg: string) => void): Promise<DownloadResult> {
+  const log = debugLog || console.log
+  
   try {
-    console.log('Starting download for URL:', url)
+    log('Starting download for URL: ' + url)
     
     // Call our API endpoint
     const response = await fetch('/api/download', {
@@ -17,11 +19,11 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
       body: JSON.stringify({ url }),
     })
 
-    console.log('API response status:', response.status)
+    log('API response status: ' + response.status)
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('API error response:', errorText)
+      log('API error response: ' + errorText)
       
       let errorMessage = 'Failed to get download URL'
       try {
@@ -35,17 +37,17 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
     }
 
     const data = await response.json()
-    console.log('API response data:', data)
+    log('API response data: ' + JSON.stringify(data))
     
     // Check if we're on mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     
     if (isMobile && navigator.share) {
       try {
-        console.log('Mobile detected, attempting file download and share')
+        log('Mobile detected, attempting file download and share')
         
         // Download the video file as blob
-        console.log('Fetching video blob from:', data.downloadUrl)
+        log('Fetching video blob from: ' + data.downloadUrl)
         const videoResponse = await fetch(data.downloadUrl)
         
         if (!videoResponse.ok) {
@@ -53,14 +55,14 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
         }
         
         const videoBlob = await videoResponse.blob()
-        console.log('Video blob size:', videoBlob.size)
+        log('Video blob size: ' + videoBlob.size)
         
         // Create a file from the blob
         const videoFile = new File([videoBlob], data.filename, { type: 'video/mp4' })
         
         // Check if sharing files is supported
         if (navigator.canShare && navigator.canShare({ files: [videoFile] })) {
-          console.log('File sharing supported, attempting share')
+          log('File sharing supported, attempting share')
           // Share the actual video file
           await navigator.share({
             title: data.title || 'Loom Video',
@@ -73,11 +75,11 @@ export async function downloadLoomVideo(url: string): Promise<DownloadResult> {
             title: data.title
           }
         } else {
-          console.log('File sharing not supported, falling back')
+          log('File sharing not supported, falling back')
         }
       } catch (shareError) {
-        console.error('Share with file failed:', shareError)
-        console.log('Falling back to direct download')
+        log('Share with file failed: ' + (shareError as Error).message)
+        log('Falling back to direct download')
       }
     }
     
