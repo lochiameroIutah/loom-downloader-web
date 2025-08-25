@@ -71,15 +71,17 @@ export async function POST(request: NextRequest) {
 
     } catch (apiError) {
       console.error('Loom API error:', apiError)
+      const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error'
       return NextResponse.json({ 
-        error: `Loom API error: ${apiError.message || 'Unknown error'}` 
+        error: `Loom API error: ${errorMessage}` 
       }, { status: 502 })
     }
 
   } catch (error) {
     console.error('General API error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json({ 
-      error: `Server error: ${error.message || 'Unknown error'}` 
+      error: `Server error: ${errorMessage}` 
     }, { status: 500 })
   }
 }
